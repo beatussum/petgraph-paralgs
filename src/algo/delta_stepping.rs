@@ -332,3 +332,196 @@ where
 
     None
 }
+
+#[cfg(test)]
+mod tests {
+    macro_rules! test_delta {
+        () => {
+            #[test]
+            fn only_heavy_edges() {
+                build_with(1);
+            }
+
+            #[test]
+            fn mixed() {
+                build_with(5);
+            }
+
+            #[test]
+            fn one_bucket() {
+                build_with(u8::MAX);
+            }
+        };
+    }
+
+    mod chain {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::UnGraph;
+
+        fn build_with(delta: u8) {
+            let graph = UnGraph::<(), u8>::from_edges([(0, 1, 1), (1, 2, 5), (2, 3, 2), (3, 4, 5)]);
+
+            let (distance, path) = delta_stepping(
+                &graph,
+                0.into(),
+                |node| node == 4.into(),
+                |edge| *edge.weight(),
+                delta,
+            )
+            .expect("No solution found");
+
+            let path = path.into_iter().map(|i| i.index()).collect::<Vec<_>>();
+
+            assert_eq!(path, [0, 1, 2, 3, 4]);
+            assert_eq!(distance, 13);
+        }
+
+        test_delta!();
+    }
+
+    mod complete {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::UnGraph;
+
+        fn build_with(delta: u8) {
+            let graph = UnGraph::<(), u8>::from_edges([
+                (0, 1, 1),
+                (1, 2, 1),
+                (2, 3, 1),
+                (3, 0, 5),
+                (1, 3, 5),
+                (0, 2, 5),
+            ]);
+
+            let (distance, path) = delta_stepping(
+                &graph,
+                0.into(),
+                |node| node == 3.into(),
+                |edge| *edge.weight(),
+                delta,
+            )
+            .expect("No solution found");
+
+            let path = path.into_iter().map(|i| i.index()).collect::<Vec<_>>();
+
+            assert_eq!(path, [0, 1, 2, 3]);
+            assert_eq!(distance, 3);
+        }
+
+        test_delta!();
+    }
+
+    mod empty {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::UnGraph;
+
+        fn build_with(delta: u8) {
+            let graph = UnGraph::<(), u8>::default();
+
+            let found = delta_stepping(
+                &graph,
+                0.into(),
+                |node| node == 3.into(),
+                |edge| *edge.weight(),
+                delta,
+            );
+
+            assert!(found.is_none());
+        }
+
+        test_delta!();
+    }
+
+    mod greedy_is_not_solution {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::DiGraph;
+
+        fn build_with(delta: u8) {
+            let graph = DiGraph::<(), u8>::from_edges([
+                (0, 1, 5),
+                (1, 2, 1),
+                (0, 3, 1),
+                (3, 4, 2),
+                (4, 5, 5),
+                (4, 6, 5),
+            ]);
+
+            let (distance, path) = delta_stepping(
+                &graph,
+                0.into(),
+                |node| graph.edges(node).next().is_none(),
+                |edge| *edge.weight(),
+                delta,
+            )
+            .expect("No solution found");
+
+            let path = path.into_iter().map(|i| i.index()).collect::<Vec<_>>();
+
+            assert_eq!(path, [0, 1, 2]);
+            assert_eq!(distance, 6);
+        }
+
+        test_delta!();
+    }
+
+    mod none {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::UnGraph;
+
+        fn build_with(delta: u8) {
+            let graph = UnGraph::<(), u8>::from_edges([(0, 1, 1), (1, 2, 5), (3, 4, 5)]);
+
+            let found = delta_stepping(
+                &graph,
+                0.into(),
+                |node| node == 4.into(),
+                |edge| *edge.weight(),
+                delta,
+            );
+
+            assert!(found.is_none());
+        }
+
+        test_delta!();
+    }
+
+    mod tree {
+        use crate::algo::delta_stepping;
+        use petgraph::graph::DiGraph;
+
+        fn build_with(delta: u8) {
+            let graph = DiGraph::<(), u8>::from_edges([
+                (0, 1, 1),
+                (0, 2, 5),
+                (1, 3, 5),
+                (1, 4, 2),
+                (2, 5, 5),
+                (2, 6, 2),
+                (3, 7, 3),
+                (3, 8, 5),
+                (4, 9, 3),
+                (4, 10, 5),
+                (5, 11, 3),
+                (5, 12, 5),
+                (6, 13, 3),
+                (6, 14, 5),
+            ]);
+
+            let (distance, path) = delta_stepping(
+                &graph,
+                0.into(),
+                |node| graph.edges(node).next().is_none(),
+                |edge| *edge.weight(),
+                delta,
+            )
+            .expect("No solution found");
+
+            let path = path.into_iter().map(|i| i.index()).collect::<Vec<_>>();
+
+            assert_eq!(path, [0, 1, 4, 9]);
+            assert_eq!(distance, 6);
+        }
+
+        test_delta!();
+    }
+}
