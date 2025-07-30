@@ -6,7 +6,7 @@ use petgraph::{
 use rayon::prelude::*;
 
 use std::{
-    cmp::min_by_key,
+    cmp::{Ordering, min_by_key},
     collections::LinkedList,
     fmt::Debug,
     hash::Hash,
@@ -29,6 +29,26 @@ impl<K: PositiveMeasure, NodeId> Default for Distance<K, NodeId> {
             distance: K::zero(),
             previous: None,
         }
+    }
+}
+
+impl<K: PartialEq, NodeId> PartialEq for Distance<K, NodeId> {
+    fn eq(&self, other: &Self) -> bool {
+        self.distance.eq(&other.distance)
+    }
+}
+
+impl<K: Eq, NodeId> Eq for Distance<K, NodeId> {}
+
+impl<K: PartialOrd, NodeId> PartialOrd for Distance<K, NodeId> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.distance.partial_cmp(&other.distance)
+    }
+}
+
+impl<K: Ord, NodeId> Ord for Distance<K, NodeId> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.distance.cmp(&other.distance)
     }
 }
 
@@ -61,14 +81,7 @@ where
         match self {
             Solved(s) => {
                 if let Solved(other) = other {
-                    *s = min_by_key(
-                        *s,
-                        *other,
-                        |&DistancedNode {
-                             distance: Distance { distance, .. },
-                             ..
-                         }| distance,
-                    );
+                    *s = min_by_key(*s, *other, |&DistancedNode { distance, .. }| distance);
                 }
             }
 
@@ -83,14 +96,7 @@ where
         match self {
             Self::Solved(s) => {
                 if let Explored::Solved(value) = value {
-                    *s = min_by_key(
-                        *s,
-                        value,
-                        |&DistancedNode {
-                             distance: Distance { distance, .. },
-                             ..
-                         }| distance,
-                    );
+                    *s = min_by_key(*s, value, |&DistancedNode { distance, .. }| distance);
                 }
             }
 
