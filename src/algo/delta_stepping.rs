@@ -318,8 +318,6 @@ where
 ///
 /// # Example
 ///
-/// You can consult this example at `examples/delta_stepping.rs`.
-///
 /// ```
 /// use petgraph::Graph;
 /// use petgraph_paralgs::algo::delta_stepping;
