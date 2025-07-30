@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 ahash = "0.8.12"
-dashmap = { version = "6.1.0", features = ["rayon"] }
-num-traits = "0.2.19"
+dashmap = "6.1.0"
 petgraph = "0.8.2"
 rayon = "1.10.0"

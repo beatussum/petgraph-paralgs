@@ -76,7 +76,6 @@ dependencies = [
  "lock_api",
  "once_cell",
  "parking_lot_core",
- "rayon",
 ]
 
 [[package]]
@@ -159,15 +158,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-traits"
-version = "0.2.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
-dependencies = [
- "autocfg",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -204,7 +194,6 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "dashmap",
- "num-traits",
  "petgraph",
  "rayon",
 ]
@@ -255,9 +244,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.5.16"
+version = "0.5.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7251471db004e509f4e75a62cca9435365b5ec7bcdff530d612ac7c87c44a792"
+checksum = "5407465600fb0548f1442edf71dd20683c6ed326200ace4b1ef0763521bb3b77"
 dependencies = [
  "bitflags",
 ]
