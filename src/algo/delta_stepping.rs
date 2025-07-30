@@ -1,3 +1,5 @@
+//! Implementation of [`delta_stepping`]
+
 use petgraph::{
     algo::{Measure, PositiveMeasure},
     visit::{EdgeRef, GraphBase, IntoEdges, Visitable},
@@ -273,6 +275,55 @@ where
     }
 }
 
+/// Delta-Stepping single-source shortest path algorithm
+///
+/// Computes the shortest path from `start` to `finish`, including the total
+/// path cost.
+///
+/// `finish` is implicitly given by the `is_goal` callback, which should return
+/// `true` if the given node is the finish node.
+///
+/// The function `edge_cost` should return the cost for a particular edge. Edge
+/// costs must be **positive**.
+///
+/// # Arguments
+///
+/// - `graph` - The weighted graph
+/// - `start` - The start node
+/// - `is_goal` - The callback that defines the goal node
+/// - `edge_cost` - The callback that returns the cost of a particular edge
+/// - `delta` - The delta parameter (see [this section](#complexity) for more
+///   information)
+///
+/// # Returns
+///
+/// - `Some(K, Vec<G::NodeId>)` - The total cost and path from start to finish
+///   (if one was found).
+/// - `None` - If no path was found.
+///
+/// # Complexity
+///
+/// The time complexity largely depends on
+/// - the number of threads used (see [`rayon::ThreadPoolBuilder::num_threads`]
+///   for more information),
+/// - the configuration of the graph (values of the weighted edges),
+/// - and the delta parameter.
+///
+/// The higher the delta parameter, the more the algorithm processes node
+/// explorations in parallel, but the more potentially unecessary tasks it
+/// processes.
+///
+/// In the worst case, the algorithm will behave like
+/// [`petgraph::algo::dijkstra()`].
+///
+/// # Example
+///
+/// You can consult this example at `examples/delta_stepping.rs`.
+///
+/// ```rust
+#[allow(clippy::needless_doctest_main)]
+#[doc = include_str!("../../examples/delta_stepping.rs")]
+/// ```
 pub fn delta_stepping<G, F, K, IsGoal>(
     graph: G,
     start: G::NodeId,
